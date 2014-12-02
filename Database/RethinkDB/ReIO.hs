@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Database.RethinkDB.RethinkIO where
+module Database.RethinkDB.ReIO where
 
 import Data.Text (Text)
 import Database.RethinkDB.NoClash
