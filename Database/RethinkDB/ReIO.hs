@@ -12,14 +12,28 @@ import Control.Monad.Trans (liftIO)
 -- a connected database, handle, and resource
 data Connection = Connection RethinkDBHandle Database
 type RethinkIO = ReaderT Connection IO
-        
-connectDb :: String -> Text -> IO Connection
-connectDb dbHost dbName = do
-    hand <- connect dbHost 28015 Nothing
+
+
+type Host = String
+type Port = Integer
+data Endpoint = Endpoint Host Port deriving (Show, Eq)
+
+instance Read Endpoint where
+
+-- pass in something like: localhost:28015
+connectDb :: Endpoint -> Text -> IO Connection
+connectDb (Endpoint host port) dbName = do
+    hand <- connect host port Nothing
     let database = db dbName
     let handleDb = use database hand
     -- run' connection $ dbCreate "courses"
     return $ Connection handleDb database
+
+readEndpoint :: String -> Endpoint
+readEndpoint s = Endpoint host port
+    where
+    (host, rest) = span (/= ':') s
+    port = read $ drop 1 rest
 
 runDb :: (Expr a, Result r) => a -> RethinkIO r
 runDb e = do
