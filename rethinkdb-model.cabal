@@ -10,7 +10,7 @@ license-file:        LICENSE
 author:              Sean Hess
 maintainer:          Sean Hess <seanhess@gmail.com>
  
-homepage: http://github.com/atnnn/haskell-rethinkdb  
+homepage: http://github.com/seanhess/rethinkdb-model
 category:            Database
 build-type:          Simple
 extra-source-files:  README.md
