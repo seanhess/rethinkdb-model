@@ -1,9 +1,21 @@
+{-# LANGUAGE OverloadedStrings #-}
 
+module Database.RethinkDB.Model.Deletable where
+
+import Control.Monad (mzero)
+
+import Prelude hiding ((==), (&&), not)
+
+import Data.Aeson
+import Database.RethinkDB hiding (Object, toJSON)
+import qualified Data.HashMap.Strict as H
+import Data.Maybe
+import Data.Text (Text, unpack)
 
 -- Deletable ---------------------------------------------
+
 data Deletable a = Deletable Bool a deriving (Show)
 
--- serialize it with the deleted field
 instance ToJSON a => ToJSON (Deletable a) where
     toJSON (Deletable d item) = object $ ("deleted" .= d) : pairs (toJSON item)
         where pairs (Object o) = H.toList o
@@ -19,15 +31,8 @@ instance FromJSON a => FromJSON (Deletable a) where
 instance (ToDatum a, ToJSON a) => ToDatum (Deletable a)
 instance (FromDatum a, FromJSON a) => FromDatum (Deletable a)
 
--- marks a record as deleted
---markDeleted :: Table -> Id -> RethinkIO ()
---markDeleted t id = runDb $ update deleted (byId t id)
-
 deleted :: b -> [Attribute a]
 deleted = const ["deleted" := True]
-
--- filter by not deleted
--- don't use an index, just filter them out
 
 notDeleted :: (Expr a) => a -> ReQL
 notDeleted = not . isDeleted

@@ -2,23 +2,36 @@
 
 module Database.RethinkDB.Model.HasId where
 
-import Prelude hiding ((==), (&&), not, id)
-
 import Control.Monad (mzero)
 
 import Data.Aeson
-import Database.RethinkDB hiding (Object)
+import Database.RethinkDB hiding (Object, toJSON)
 import qualified Data.HashMap.Strict as H
 import Data.Maybe
 import Data.Text (Text, unpack)
 
--- HasId --------------------------------------------------
--- shared code for working with id-based resources
--- this is cool because you can say whether a route is expecting
--- raw objects or objects with ids (like for create, we want to ignore the id)
+-- * Id field
+
+-- | Use HasId to control how the id field is handled for your records. 
+-- For example, if I have the following record:
+-- 
+-- > data User = { username :: Text } deriving (Show, Generic)
+-- > instance ToJSON User
+-- > instance FromJSON User
+--
+-- This will be stored as @{ id: "...", username: "..." }@ by rethinkdb. Now, we can write functions that include the id:
+--
+-- > getUser :: Id -> IO (Maybe (HasId User))
+-- > getUser id = run h $ table "users" # get (expr id)
+-- 
+-- Or if you don't want to include the id, just leave off @HasId@
+--
+-- > addUser :: User -> IO ()
+-- > addUser user = run h $ table "users" # insert (toDatum user)
+
+data HasId a = HasId Id a deriving (Show)
 
 type Id = Text
-data HasId a = HasId Id a deriving (Show)
 
 instance ToJSON a => ToJSON (HasId a) where
     toJSON (HasId id item) = object $ ("id" .= id) : pairs (toJSON item)
@@ -47,11 +60,5 @@ create t obj = insert (toDatum obj) t
 
 setId :: (ToDatum a) => WriteResponse -> a -> HasId a
 setId result obj = HasId (insertKey result) obj
-
-toRQL :: Text -> ReQL
-toRQL = str . unpack
-
-byId :: Table -> Text -> ReQL
-byId t id = get (toRQL id) t
 
 
