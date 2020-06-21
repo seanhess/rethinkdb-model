@@ -2,10 +2,8 @@
 
 module Database.RethinkDB.Model.IO where
 
-import Data.Text (Text)
 import Database.RethinkDB.NoClash
 
-import Control.Applicative ((<$>))
 import Control.Monad.Trans.Reader
 import Control.Monad.Trans (liftIO)
 

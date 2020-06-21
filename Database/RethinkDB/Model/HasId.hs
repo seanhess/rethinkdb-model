@@ -8,7 +8,7 @@ import Data.Aeson
 import Database.RethinkDB hiding (Object, toJSON)
 import qualified Data.HashMap.Strict as H
 import Data.Maybe
-import Data.Text (Text, unpack)
+import Data.Text (Text)
 
 -- * Id field
 
@@ -34,7 +34,7 @@ data HasId a = HasId Id a deriving (Show)
 type Id = Text
 
 instance ToJSON a => ToJSON (HasId a) where
-    toJSON (HasId id item) = object $ ("id" .= id) : pairs (toJSON item)
+    toJSON (HasId i item) = object $ ("id" .= i) : pairs (toJSON item)
         where pairs (Object o) = H.toList o
               pairs _ = []
 
